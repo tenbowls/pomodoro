@@ -1,0 +1,8 @@
+{
+    "timer" : {
+        "Focus (Short)" : 25,
+        "Focus (Long)" : 45,
+        "Break (Short)" : 5, 
+        "Break (Long)" : 15
+    }
+}
