@@ -45,19 +45,28 @@ class TimerTypeButtons(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.layout = QHBoxLayout(self)
+
         self.short_focus_btn = QPushButton("Focus (S)")
         self.long_focus_btn = QPushButton("Focus (L)")
         self.short_break_btn = QPushButton("Break (S)")
         self.long_break_btn = QPushButton("Break (L)")
 
-        self.short_focus_btn.setEnabled(False)
+        self.button_dict = {
+            TimerTypeNames.focus_s: self.short_focus_btn,
+            TimerTypeNames.focus_l: self.long_focus_btn,
+            TimerTypeNames.break_s: self.short_break_btn,
+            TimerTypeNames.break_l: self.long_break_btn,
+        }
+
+        self.current_button_typed = TimerTypeNames.focus_s
+        self.short_focus_clicked()
 
         self.short_focus_btn.released.connect(self.short_focus_clicked)
         self.long_focus_btn.released.connect(self.long_focus_clicked)
         self.short_break_btn.released.connect(self.short_break_clicked)
         self.long_break_btn.released.connect(self.long_break_clicked)
 
+        self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.short_focus_btn)
         self.layout.addWidget(self.long_focus_btn)
         self.layout.addWidget(self.short_break_btn)
@@ -79,25 +88,29 @@ class TimerTypeButtons(QWidget):
     @Slot()
     def short_focus_clicked(self):
         self.button_clicked_type.emit(TimerTypeNames.focus_s)
-        self.enable_all_buttons()
+        self.button_dict[self.current_button_typed].setEnabled(True)
+        self.current_button_typed = TimerTypeNames.focus_s
         self.short_focus_btn.setEnabled(False)
 
     @Slot()
     def long_focus_clicked(self):
         self.button_clicked_type.emit(TimerTypeNames.focus_l)
-        self.enable_all_buttons()
+        self.button_dict[self.current_button_typed].setEnabled(True)
+        self.current_button_typed = TimerTypeNames.focus_l
         self.long_focus_btn.setEnabled(False)
 
     @Slot()
     def short_break_clicked(self):
         self.button_clicked_type.emit(TimerTypeNames.break_s)
-        self.enable_all_buttons()
+        self.button_dict[self.current_button_typed].setEnabled(True)
+        self.current_button_typed = TimerTypeNames.break_s
         self.short_break_btn.setEnabled(False)
 
     @Slot()
     def long_break_clicked(self):
         self.button_clicked_type.emit(TimerTypeNames.break_l)
-        self.enable_all_buttons()
+        self.button_dict[self.current_button_typed].setEnabled(True)
+        self.current_button_typed = TimerTypeNames.break_l
         self.long_break_btn.setEnabled(False)
 
 
@@ -135,7 +148,7 @@ class PomodoroWindow(QWidget):
         # Display Widget and Main Timer Widget
         self.timer_display = TimerDisplay(minutes)
         self.main_timer = MainTimer(convert_mins_to_msec(minutes))
-        self.main_timer.timeout.connect(self.timer_complete)
+        self.main_timer.timeout.connect(self.reset_timer)
 
         # Timer to update display 
         self.update_display_timer = OneSecTimer()
@@ -179,16 +192,13 @@ class PomodoroWindow(QWidget):
             self.timer_ongoing = False
 
     @Slot()
-    def timer_complete(self):
-        self.reset_timer()
-
-    @Slot()
     def reset_timer(self):
         self.update_display_timer.stop()
         self.main_timer.setInterval(convert_mins_to_msec(self.minutes))
         self.timer_display.update_display(self.minutes)
         self.timer_ctrl_buttons.buttons_not_start_state()
         self.timer_type_buttons.enable_all_buttons()
+        self.timer_type_buttons.button_dict[self.timer_type_buttons.current_button_typed].released.emit()
         self.timer_ongoing = False 
 
     def update_timer_and_display(self, new_minutes: int):

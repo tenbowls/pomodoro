@@ -1,13 +1,13 @@
 from src.pomodoro import PomodoroWindow, TimerTypeNames
 from src import data, config 
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot 
 
 class PomodoroMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.focus = True # To determine whether to update csv when timer completes 
-        self.timer_dict = config.read_config("config.json")
+        self.timer_dict = config.read_config("./files/config.json")
 
         self.setWindowTitle("Pomodoro")
         self.window = PomodoroWindow(self.timer_dict[TimerTypeNames.focus_s])
@@ -18,9 +18,8 @@ class PomodoroMainWindow(QMainWindow):
 
     @Slot()
     def timer_complete(self):
-        # TODO: Add beep 
         if self.focus:
-            data.add_row_to_csv("pomodoro_data.csv", (self.window.minutes * 60))
+            data.add_row_to_csv("./files/pomodoro_data.csv", (self.window.minutes * 60))
 
     @Slot()
     def switch_timer_type(self, new_timer_type: str):
