@@ -4,5 +4,7 @@
         "Focus (Long)" : 45,
         "Break (Short)" : 5, 
         "Break (Long)" : 15
-    }
+    }, 
+
+    "alarm": "Bell (Arcade Score)"
 }
