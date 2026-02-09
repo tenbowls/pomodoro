@@ -1,8 +1,10 @@
 import json 
-from PySide6.QtWidgets import QDialog, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QDialogButtonBox, QMessageBox
+from PySide6.QtWidgets import QDialog, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QDialogButtonBox, QMessageBox, QComboBox
 from PySide6.QtCore import Slot, Signal 
 from PySide6.QtGui import QIntValidator
 from src.pomodoro import TimerTypeNames
+from os import listdir 
+from os.path import isfile, join 
 
 class ConfigKeys(enumerate):
     timer = "timer"
@@ -56,6 +58,28 @@ class TimerSettingDialog(QDialog):
         self.new_timer_dict_signal.emit(new_timer_dict)
         QDialog.accept(self)
 
+class AlarmSettingDialog(QDialog):
+    new_alarm = Signal(str)
+
+    def __init__(self, choices, current):
+        super().__init__()
+        self.audio_choices_combo_box = QComboBox()
+        self.audio_choices_combo_box.addItems(choices)
+        self.audio_choices_combo_box.setCurrentText(current)
+
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.save_alarm)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(SettingSingleRowWidget("Alarm", self.audio_choices_combo_box))
+        layout.addWidget(self.buttonBox) 
+
+    @Slot()
+    def save_alarm(self):
+        self.new_alarm.emit(self.audio_choices_combo_box.currentText())
+        QDialog.accept(self)
+
 
 def read_config(json_file: str) -> dict:
     with open(json_file, "r") as f:
@@ -66,3 +90,6 @@ def read_config(json_file: str) -> dict:
 def write_config(json_file: str, configs_dict):
     with open(json_file, "w") as f:
         json.dump(configs_dict, f, indent=3)
+
+def get_audio_choices(folder: str):
+    return sorted([f.split(".")[0] for f in listdir(folder)])

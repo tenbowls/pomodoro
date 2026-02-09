@@ -21,7 +21,10 @@ class PomodoroMainWindow(QMainWindow):
 
         timer_setting_action = QAction("Timer", self)
         timer_setting_action.triggered.connect(self.show_timer_settings)
+
         alarm_setting_action = QAction("Alarm", self)
+        alarm_setting_action.triggered.connect(self.show_alarm_settings)
+
         menu = self.menuBar()
         setting_menu = menu.addMenu("&Settings") 
         setting_menu.addAction(timer_setting_action)
@@ -31,7 +34,7 @@ class PomodoroMainWindow(QMainWindow):
     def timer_complete(self):
         if self.focus:
             data.add_row_to_csv("./files/pomodoro_data.csv", (self.window.minutes * 60))
-        self.play_alarm()
+        self.play_alarm(self.configs[config.ConfigKeys.alarm])
 
     @Slot()
     def switch_timer_type(self, new_timer_type: str):
@@ -42,9 +45,9 @@ class PomodoroMainWindow(QMainWindow):
 
         self.pomo_window.update_timer_and_display(self.configs[config.ConfigKeys.timer][new_timer_type])
 
-    def play_alarm(self):
+    def play_alarm(self, audio_name):
         try:
-            playsound(f"audio/{self.configs[config.ConfigKeys.alarm]}.wav")
+            playsound(f"audio/{audio_name}.wav")
         except PlaysoundException:
             pass # Do nothing if playsound fail 
 
@@ -52,6 +55,13 @@ class PomodoroMainWindow(QMainWindow):
     def show_timer_settings(self):
         dialog = config.TimerSettingDialog(self.configs[config.ConfigKeys.timer])
         dialog.new_timer_dict_signal.connect(self.update_timer)
+        dialog.exec() 
+
+    @Slot()
+    def show_alarm_settings(self):
+        dialog = config.AlarmSettingDialog(config.get_audio_choices("audio"), self.configs[config.ConfigKeys.alarm])
+        dialog.new_alarm.connect(self.update_alarm_setting)
+        dialog.audio_choices_combo_box.currentTextChanged.connect(self.play_alarm)
         dialog.exec() 
 
     @Slot()
@@ -66,6 +76,12 @@ class PomodoroMainWindow(QMainWindow):
             self.pomo_window.update_timer_and_display(new_timer_dict[self.pomo_window.timer_type_buttons.current_button_type])
         else:
             self.pomo_window.minutes = new_timer_dict[self.pomo_window.timer_type_buttons.current_button_type]
+
+    @Slot()
+    def update_alarm_setting(self, new_alarm):
+        self.configs[config.ConfigKeys.alarm] = new_alarm
+        config.write_config(self.config_filename, self.configs)
+
 
 if __name__ == "__main__":
     app = QApplication([])
