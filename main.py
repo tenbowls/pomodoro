@@ -33,7 +33,7 @@ class PomodoroMainWindow(QMainWindow):
     @Slot()
     def timer_complete(self):
         if self.focus:
-            data.add_row_to_csv("./files/pomodoro_data.csv", (self.window.minutes * 60))
+            data.add_row_to_csv("./files/pomodoro_data.csv", (self.pomo_window.minutes))
         self.play_alarm(self.configs[config.ConfigKeys.alarm])
 
     @Slot()

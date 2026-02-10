@@ -4,7 +4,6 @@ from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QIntValidator
 from src.pomodoro import TimerTypeNames
 from os import listdir 
-from os.path import isfile, join 
 
 class ConfigKeys(enumerate):
     timer = "timer"
