@@ -1,9 +1,22 @@
 from src.pomodoro import PomodoroWindow, TimerTypeNames
 from src import data, config 
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCore import Slot 
+from PySide6.QtCore import Slot, QThread
 from PySide6.QtGui import QAction
 from playsound3 import playsound, PlaysoundException
+
+class ChimeThread(QThread):
+    def __init__(self, audio_name):
+        super().__init__()
+        self.audio_name = audio_name 
+
+    @Slot()
+    def run(self):
+        try:
+            playsound(f"audio/{self.audio_name}.wav")
+        except PlaysoundException:
+            pass # Do nothing if playsound fail 
+
 
 class PomodoroMainWindow(QMainWindow):
     def __init__(self):
@@ -11,6 +24,7 @@ class PomodoroMainWindow(QMainWindow):
         self.config_filename = "./files/config.json"
         self.focus = True # To determine whether to update csv when timer completes 
         self.configs = config.read_config(self.config_filename)
+        self.chime_thread = ChimeThread(self.configs[config.ConfigKeys.alarm])
 
         self.setWindowTitle("Pomodoro")
         self.pomo_window = PomodoroWindow(self.configs[config.ConfigKeys.timer][TimerTypeNames.focus_s]) # Default is short focus timer 
@@ -34,7 +48,8 @@ class PomodoroMainWindow(QMainWindow):
     def timer_complete(self):
         if self.focus:
             data.add_row_to_csv("./files/pomodoro_data.csv", (self.pomo_window.minutes))
-        self.play_alarm(self.configs[config.ConfigKeys.alarm])
+        self.chime_thread.audio_name = self.configs[config.ConfigKeys.alarm]
+        self.chime_thread.start()
 
     @Slot()
     def switch_timer_type(self, new_timer_type: str):
@@ -43,13 +58,7 @@ class PomodoroMainWindow(QMainWindow):
         else:
             self.focus = False
 
-        self.pomo_window.update_timer_and_display(self.configs[config.ConfigKeys.timer][new_timer_type])
-
-    def play_alarm(self, audio_name):
-        try:
-            playsound(f"audio/{audio_name}.wav")
-        except PlaysoundException:
-            pass # Do nothing if playsound fail 
+        self.pomo_window.update_timer_and_display(self.configs[config.ConfigKeys.timer][new_timer_type]) 
 
     @Slot()
     def show_timer_settings(self):
@@ -80,7 +89,13 @@ class PomodoroMainWindow(QMainWindow):
     @Slot()
     def update_alarm_setting(self, new_alarm):
         self.configs[config.ConfigKeys.alarm] = new_alarm
+        self.chime_thread.audio_name = new_alarm
         config.write_config(self.config_filename, self.configs)
+
+    @Slot()
+    def play_alarm(self, audio_name):
+        self.chime_thread.audio_name = audio_name
+        self.chime_thread.start()
 
 
 if __name__ == "__main__":
