@@ -20,8 +20,8 @@ class SettingSingleRowWidget(QWidget):
 class TimerSettingDialog(QDialog):
     new_timer_dict_signal = Signal(dict)
 
-    def __init__(self, timer_dict):
-        super().__init__()
+    def __init__(self, timer_dict, parent=None):
+        super().__init__(parent=parent)
         self.timer_edit_dict = {
             TimerTypeNames.focus_s: QLineEdit(validator=QIntValidator()), 
             TimerTypeNames.focus_l: QLineEdit(validator=QIntValidator()), 
@@ -60,8 +60,8 @@ class TimerSettingDialog(QDialog):
 class AlarmSettingDialog(QDialog):
     new_alarm = Signal(str)
 
-    def __init__(self, choices, current):
-        super().__init__()
+    def __init__(self, choices, current, parent=None):
+        super().__init__(parent=parent)
         self.audio_choices_combo_box = QComboBox()
         self.audio_choices_combo_box.addItems(choices)
         self.audio_choices_combo_box.setCurrentText(current)

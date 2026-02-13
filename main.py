@@ -22,6 +22,7 @@ class PomodoroMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.config_filename = "./files/config.json"
+        self.csv_filename = "./files/pomodoro_data.csv"
         self.focus = True # To determine whether to update csv when timer completes 
         self.configs = config.read_config(self.config_filename)
         self.chime_thread = ChimeThread(self.configs[config.ConfigKeys.alarm])
@@ -39,15 +40,19 @@ class PomodoroMainWindow(QMainWindow):
         alarm_setting_action = QAction("Alarm", self)
         alarm_setting_action.triggered.connect(self.show_alarm_settings)
 
+        show_stats_action = QAction("Stats", self)
+        show_stats_action.triggered.connect(self.show_stats_dialog)
+
         menu = self.menuBar()
         setting_menu = menu.addMenu("&Settings") 
         setting_menu.addAction(timer_setting_action)
         setting_menu.addAction(alarm_setting_action) 
+        setting_menu.addAction(show_stats_action) 
 
     @Slot()
     def timer_complete(self):
         if self.focus:
-            data.add_row_to_csv("./files/pomodoro_data.csv", (self.pomo_window.minutes))
+            data.add_row_to_csv(self.csv_filename, (self.pomo_window.minutes))
         self.chime_thread.audio_name = self.configs[config.ConfigKeys.alarm]
         self.chime_thread.start()
 
@@ -62,16 +67,21 @@ class PomodoroMainWindow(QMainWindow):
 
     @Slot()
     def show_timer_settings(self):
-        dialog = config.TimerSettingDialog(self.configs[config.ConfigKeys.timer])
+        dialog = config.TimerSettingDialog(self.configs[config.ConfigKeys.timer], parent=self)
         dialog.new_timer_dict_signal.connect(self.update_timer)
         dialog.exec() 
 
     @Slot()
     def show_alarm_settings(self):
-        dialog = config.AlarmSettingDialog(config.get_audio_choices("audio"), self.configs[config.ConfigKeys.alarm])
+        dialog = config.AlarmSettingDialog(config.get_audio_choices("audio"), self.configs[config.ConfigKeys.alarm], parent=self)
         dialog.new_alarm.connect(self.update_alarm_setting)
         dialog.audio_choices_combo_box.currentTextChanged.connect(self.play_alarm)
         dialog.exec() 
+
+    @Slot()
+    def show_stats_dialog(self):
+        dialog = data.DataDialog(data.get_df_from_csv(self.csv_filename), parent=self)
+        dialog.exec()
 
     @Slot()
     def update_timer(self, new_timer_dict):

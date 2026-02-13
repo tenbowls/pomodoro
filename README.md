@@ -6,11 +6,14 @@
 - [X] Include 4 different timer profiles (up to 60 minutes)
 - [X] Short chime when timer ends 
 - [X] Settings to change timer durations and chime sound 
+- [X] Viewing of timer completion recent stats 
 
 ## Pending Features
-- [ ] Viewing of timer completion history 
+- [ ] Allow flexible dates when viewing timer completion stats 
 - [ ] Styling of widgets 
 
 ## Dependencies:
 - `pyside6`
 - `playsound3` 
+- `pandas`
+- `matplotlib`
