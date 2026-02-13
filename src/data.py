@@ -91,6 +91,9 @@ class DataDialog(QDialog):
     def dropdown_selection_changed(self, new_text: str):
         if new_text == "Custom":
             self.custom_date_editor.show()
+            q_start_date = self.custom_date_editor.start_date_editor.date()
+            q_end_date = self.custom_date_editor.end_date_editor.date()
+            self.new_date_range.emit(datetime(*q_start_date.getDate()), datetime(*q_end_date.getDate()))
 
         elif new_text == "Last 30 days":
             self.new_date_range.emit(self.datetime_today_date - timedelta(29), self.datetime_today_date)
