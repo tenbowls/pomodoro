@@ -45,6 +45,7 @@ class DataDialog(QDialog):
 
     def __init__(self, df, parent=None):
         super().__init__(parent=parent)
+        self.setWindowTitle("Stats")
         self.df = df 
         self.new_date_range.connect(self.update_plot)
 

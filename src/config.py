@@ -22,6 +22,7 @@ class TimerSettingDialog(QDialog):
 
     def __init__(self, timer_dict, parent=None):
         super().__init__(parent=parent)
+        self.setWindowTitle("Timer Settings")
         self.timer_edit_dict = {
             TimerTypeNames.focus_s: QLineEdit(validator=QIntValidator()), 
             TimerTypeNames.focus_l: QLineEdit(validator=QIntValidator()), 
@@ -62,6 +63,7 @@ class AlarmSettingDialog(QDialog):
 
     def __init__(self, choices, current, parent=None):
         super().__init__(parent=parent)
+        self.setWindowTitle("Alarm Settings")
         self.audio_choices_combo_box = QComboBox()
         self.audio_choices_combo_box.addItems(choices)
         self.audio_choices_combo_box.setCurrentText(current)
