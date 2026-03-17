@@ -8,6 +8,16 @@
 - [X] Settings to change timer durations and chime sound 
 - [X] Viewing of timer completion recent stats with flexible date range
 
+## Interface
+Pomodoro: \
+![Pomodoro Interface](imgs/pomodoro.png)
+
+Timer Settings: \
+![Timer Settings](imgs/timer_settings.png)
+
+Stats: \
+![Stats Dialog](imgs/stats.png)
+
 ## Dependencies:
 - `pyside6`
 - `playsound3` 
