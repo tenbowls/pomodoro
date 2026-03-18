@@ -1,6 +1,10 @@
 # POMODORO
-- A pomodoro timer created using PySide6
-- Usage: run `main.py` 
+A pomodoro timer created using PySide6
+## Usage
+### Option 1 (Using Python):
+Run `main.py` (e.g., Windows: `py main.py`, Linux: `python3 main.py`)
+### Option 2 (Using executable):
+Download the pomodoro.zip folder for the respective machine and run the pomodoro executable. ([Windows](PyInstaller/Windows/pomodoro.zip), [Linux](PyInstaller/Linux/pomodoro.zip))
 
 ## Features
 - [X] Include 4 different timer profiles (up to 60 minutes)
