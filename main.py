@@ -4,16 +4,18 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import Slot, QThread
 from PySide6.QtGui import QAction
 from playsound3 import playsound, PlaysoundException
+import os 
 
 class ChimeThread(QThread):
-    def __init__(self, audio_name):
+    def __init__(self, audio_name, base_dir):
         super().__init__()
-        self.audio_name = audio_name 
+        self.audio_name = audio_name
+        self.base_dir = base_dir 
 
     @Slot()
     def run(self):
         try:
-            playsound(f"audio/{self.audio_name}.wav")
+            playsound(f"{self.base_dir}/audio/{self.audio_name}.wav")
         except PlaysoundException:
             pass # Do nothing if playsound fail 
 
@@ -21,11 +23,12 @@ class ChimeThread(QThread):
 class PomodoroMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.config_filename = "./files/config.json"
-        self.csv_filename = "./files/pomodoro_data.csv"
+        self.base_dir = os.path.dirname(__file__)
+        self.config_filename = self.base_dir + "/files/config.json"
+        self.csv_filename = self.base_dir + "/files/pomodoro_data.csv"
         self.focus = True # To determine whether to update csv when timer completes 
         self.configs = config.read_config(self.config_filename)
-        self.chime_thread = ChimeThread(self.configs[config.ConfigKeys.alarm])
+        self.chime_thread = ChimeThread(self.configs[config.ConfigKeys.alarm], self.base_dir)
 
         self.setWindowTitle("Pomodoro")
         self.pomo_window = PomodoroWindow(self.configs[config.ConfigKeys.timer][TimerTypeNames.focus_s]) # Default is short focus timer 
@@ -73,7 +76,7 @@ class PomodoroMainWindow(QMainWindow):
 
     @Slot()
     def show_alarm_settings(self):
-        dialog = config.AlarmSettingDialog(config.get_audio_choices("audio"), self.configs[config.ConfigKeys.alarm], parent=self)
+        dialog = config.AlarmSettingDialog(config.get_audio_choices(self.base_dir + "/audio"), self.configs[config.ConfigKeys.alarm], parent=self)
         dialog.new_alarm.connect(self.update_alarm_setting)
         dialog.audio_choices_combo_box.currentTextChanged.connect(self.play_alarm)
         dialog.exec() 
