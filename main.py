@@ -1,6 +1,6 @@
 from src.pomodoro import PomodoroWindow, TimerTypeNames
 from src import data, config 
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PySide6.QtCore import Slot, QThread
 from PySide6.QtGui import QAction
 from playsound3 import playsound, PlaysoundException
@@ -83,8 +83,11 @@ class PomodoroMainWindow(QMainWindow):
 
     @Slot()
     def show_stats_dialog(self):
-        dialog = data.DataDialog(data.get_df_from_csv(self.csv_filename), parent=self)
-        dialog.exec()
+        try:
+            dialog = data.DataDialog(data.get_df_from_csv(self.csv_filename), parent=self)
+            dialog.exec()
+        except FileNotFoundError:
+            QMessageBox.information(self, "No Data", "No data available. Start using focus timer to add data.")
 
     @Slot()
     def update_timer(self, new_timer_dict):
